@@ -112,7 +112,7 @@ survey_df_all <- survey_files %>%
 #View(survey_df_all)
 
 
-table(survey_df_all$T_DISP_question)
+#table(survey_df_all$T_DISP_question)
 Question_exposure <- survey_df_all %>% filter(T_DISP_question == "Think about the place you live. Do you have problems with any of the following? Select all that apply.")
 Question_1 <- survey_df_all %>% filter(T_DISP_question == "Including yourself, who in your family has had multiple sclerosis (MS)? Select all that apply.")
 Question_2 <- survey_df_all %>% filter(T_DISP_question == "Including yourself, who in your family has had rheumatoid arthritis (RA)? Select all that apply.")
@@ -237,31 +237,68 @@ nrow(cohort_observation)
 
 #View(cohort_demographics)
 
-
-
-
 #--------------------------------------------------------------------------------------------------(3) Table 1
-df_Y <- cohort_demographics %>% filter(exposure_group == "Exposed (Mold)")
-df_N <- cohort_demographics %>% filter(exposure_group == "Unexposed")
+#(1) survay data
+df_survay_Y <- cohort_survay %>% filter(exposure_group == "Exposed (Mold)")
+df_survay_N <- cohort_survay %>% filter(exposure_group == "Unexposed")
 
-nrow(df_Y) #Sample size
-nrow(df_N) #Sample size
 
-#View(df_Y)
-#colnames(df_Y)
+#table(survey_df_all$T_DISP_question)
+#Question_1_Y <- df_survay_Y %>% filter(T_DISP_question == "Including yourself, who in your family has had multiple sclerosis (MS)? Select all that apply.")
+#Question_2_Y <- df_survay_Y %>% filter(T_DISP_question == "Including yourself, who in your family has had rheumatoid arthritis (RA)? Select all that apply.")
+Question_3_Y <- df_survay_Y %>% filter(T_DISP_question == "Are you covered by health insurance or some other kind of health care plan?")
+Question_4_Y <- df_survay_Y %>% filter(T_DISP_question == "Do you own or rent the place where you live?")
+Question_5_Y <- df_survay_Y %>% filter(T_DISP_question == "What is the highest grade or year of school you completed?")
+Question_6_Y <- df_survay_Y %>% filter(T_DISP_question == "What is your annual household income from all sources?")
+Question_7_Y <- df_survay_Y %>% filter(T_DISP_question == "What is your current employment status? Please select 1 or more of these categories.")
+Question_8_Y <- df_survay_Y %>% filter(T_DISP_question == "What was your biological sex assigned at birth?")
 
-#(1) Date of birth
-#table(df_Y$date_of_birth)
-#table(df_N$date_of_birth)
+#Question_1_N <- df_survay_N %>% filter(T_DISP_question == "Including yourself, who in your family has had multiple sclerosis (MS)? Select all that apply.")
+#Question_2_N <- df_survay_N %>% filter(T_DISP_question == "Including yourself, who in your family has had rheumatoid arthritis (RA)? Select all that apply.")
+Question_3_N <- df_survay_N %>% filter(T_DISP_question == "Are you covered by health insurance or some other kind of health care plan?")
+Question_4_N <- df_survay_N %>% filter(T_DISP_question == "Do you own or rent the place where you live?")
+Question_5_N <- df_survay_N %>% filter(T_DISP_question == "What is the highest grade or year of school you completed?")
+Question_6_N <- df_survay_N %>% filter(T_DISP_question == "What is your annual household income from all sources?")
+Question_7_N <- df_survay_N %>% filter(T_DISP_question == "What is your current employment status? Please select 1 or more of these categories.")
+Question_8_N <- df_survay_N %>% filter(T_DISP_question == "What was your biological sex assigned at birth?")
 
-#(2) Ethnicity
-table(df_Y$T_DISP_ethnicity)
-table(df_N$T_DISP_ethnicity)
+#Check
+nrow(common_person_ids_5)
+nrow(Question_3_Y) + nrow(Question_3_N)
+nrow(Question_4_Y) + nrow(Question_4_N)
+nrow(Question_5_Y) + nrow(Question_5_N)
+nrow(Question_6_Y) + nrow(Question_6_N)
+nrow(Question_7_Y) + nrow(Question_7_N)
+nrow(Question_8_Y) + nrow(Question_8_N)
 
-#(3) Gender
-table(df_Y$T_DISP_gender)
-table(df_N$T_DISP_gender)
 
+
+# "Are you covered by health insurance or some other kind of health care plan?")
+table(Question_3_Y$T_DISP_answer) # Y: exposed to household mold
+table(Question_3_N$T_DISP_answer) # N: Not exposed
+
+
+# "Do you own or rent the place where you live
+table(Question_4_Y$T_DISP_answer)
+table(Question_4_N$T_DISP_answer)
+
+
+# What is the highest grade or year of school you completed
+table(Question_5_Y$T_DISP_answer)
+table(Question_5_N$T_DISP_answer)
+
+
+# What is your annual household income from all sources?
+table(Question_6_Y$T_DISP_answer)
+table(Question_6_N$T_DISP_answer)
+
+# What is your current employment status? Please select 1 or more of these categories
+table(Question_7_Y$T_DISP_answer)
+table(Question_7_N$T_DISP_answer)
+
+# What was your biological sex assigned at birth?
+table(Question_8_Y$T_DISP_answer)
+table(Question_8_N$T_DISP_answer)
 
 
 
