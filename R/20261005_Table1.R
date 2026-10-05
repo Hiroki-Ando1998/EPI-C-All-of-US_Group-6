@@ -103,7 +103,7 @@ print(paste("Found", length(survey_files), "survey files."))
 
 
 # 2. Download and merge all partitioned files into a single data frame
-survey_df_all <- survey_files %>% 
+survey_df_all_0 <- survey_files %>% 
   map_dfr(~ {
     local_tmp <- tempfile(fileext = ".csv.gz")
     system(sprintf("gsutil cp %s %s", .x, local_tmp))
@@ -111,6 +111,11 @@ survey_df_all <- survey_files %>%
   })
 #View(survey_df_all)
 
+# People who provided a report before 2024
+survey_df_all <- survey_df_all_0 %>%
+  filter(as.numeric(substr(survey_datetime, 1, 4)) < 2024) %>%
+  arrange(person_id)
+nrow(survey_df_before)
 
 #table(survey_df_all$T_DISP_question)
 Question_exposure <- survey_df_all %>% filter(T_DISP_question == "Think about the place you live. Do you have problems with any of the following? Select all that apply.")
@@ -299,8 +304,4 @@ table(Question_7_N$T_DISP_answer)
 # What was your biological sex assigned at birth?
 table(Question_8_Y$T_DISP_answer)
 table(Question_8_N$T_DISP_answer)
-
-
-
-
 
