@@ -19,14 +19,85 @@ print(file_list)
 
 # List contents of the target bucket using a wildcard (*)
 
-target_bucket <- "gs://inflammatory-disease-plus-mold-exposure-4-wb-meteoric-aubergine/*"
+target_bucket <- "gs://inflammatory-disease-plus-mold-exposure-5-wb-meteoric-aubergine/*"
 
 # Retrieve the file list
 file_list <- system(sprintf("gsutil ls %s", target_bucket), intern = TRUE)
 print(file_list)
 
 
-#-------------------------------------------------------------------------(1) Survey data
+
+#-------------------------------------------------------------------------(1-A) Observation data (Postal code [Location], Tobacco smoking status)
+observation_files <- file_list[grep("observationOccurrence", file_list)]
+print(paste("Found", length(observation_files), "observation files."))
+
+
+# 2. Download and merge all partitioned files into a single data frame
+observation_df_all_0 <- observation_files %>% 
+  map_dfr(~ {
+    local_tmp <- tempfile(fileext = ".csv.gz")
+    system(sprintf("gsutil cp %s %s", .x, local_tmp))
+    read_csv(local_tmp, show_col_types = FALSE)
+  })
+observation_df_all <- observation_df_all_0 %>% arrange(person_id)
+#View(observation_df_all)
+
+
+
+Postal_code <- observation_df_all %>% filter(observation_df_all$T_DISP_standard_concept_name == "Postal code [Location]")
+Smoking_status <- observation_df_all %>% filter(observation_df_all$T_DISP_standard_concept_name == "Tobacco smoking status")
+
+
+
+#-------------------------------------------------------------------------(1-B) Conditional data
+condition_files <- file_list[grep("conditionOccurrence", file_list)]
+print(paste("Found", length(condition_files), "condition files."))
+
+
+# 2. Download and merge all partitioned files into a single data frame
+condition_df_all_0 <- condition_files %>% 
+  map_dfr(~ {
+    local_tmp <- tempfile(fileext = ".csv.gz")
+    system(sprintf("gsutil cp %s %s", .x, local_tmp))
+    read_csv(local_tmp, show_col_types = FALSE)
+  })
+condition_df_all <- condition_df_all_0 %>% arrange(person_id, condition_start_datetime)
+
+#View(condition_df_all)
+
+
+#-------------------------------------------------------------------------(1-C) Visit occurrence data
+visit_files <- file_list[grep("visitOccurrence", file_list)]
+print(paste("Found", length(visit_files), "visit files."))
+
+
+# 2. Download and merge all partitioned files into a single data frame
+visit_df_all_0 <- visit_files %>% 
+  map_dfr(~ {
+    local_tmp <- tempfile(fileext = ".csv.gz")
+    system(sprintf("gsutil cp %s %s", .x, local_tmp))
+    read_csv(local_tmp, show_col_types = FALSE)
+  })
+visit_df_all <- visit_df_all_0 %>% arrange(person_id)
+
+#View(visit_df_all)
+
+
+#------------------------------------------------------------------------(1-D) Peson-id (demographic baseline data)
+target_file_120 <- file_list[120] #20261005_085343_1511757297_data_person-000000000000.csv.gz(see: (0) Preliminary step)
+local_file_120 <- "./survey_data.csv.gz"
+system(sprintf("gsutil cp %s %s", target_file_120, local_file_120))
+person_df <- read_csv(local_file_120)
+data.frame(person_df)
+
+
+# Compare total row count of person_df with the number of unique person_ids. If these two numbers match, there are no duplicates.
+nrow(person_df)
+length(unique(person_df$person_id))
+
+
+  
+#-------------------------------------------------------------------------(2)Survay data: Extract participants who answered positive for household mold exposure
 survey_files <- file_list[grep("surveyOccurrence", file_list)]
 print(paste("Found", length(survey_files), "survey files."))
 
@@ -41,16 +112,29 @@ survey_df_all <- survey_files %>%
 #View(survey_df_all)
 
 
+table(survey_df_all$T_DISP_question)
+Question_exposure <- survey_df_all %>% filter(T_DISP_question == "Think about the place you live. Do you have problems with any of the following? Select all that apply.")
+Question_1 <- survey_df_all %>% filter(T_DISP_question == "Including yourself, who in your family has had multiple sclerosis (MS)? Select all that apply.")
+Question_2 <- survey_df_all %>% filter(T_DISP_question == "Including yourself, who in your family has had rheumatoid arthritis (RA)? Select all that apply.")
+Question_3 <- survey_df_all %>% filter(T_DISP_question == "Are you covered by health insurance or some other kind of health care plan?")
+Question_4 <- survey_df_all %>% filter(T_DISP_question == "Do you own or rent the place where you live?")
+Question_5 <- survey_df_all %>% filter(T_DISP_question == "What is the highest grade or year of school you completed?")
+Question_6 <- survey_df_all %>% filter(T_DISP_question == "What is your annual household income from all sources?")
+Question_7 <- survey_df_all %>% filter(T_DISP_question == "What is your current employment status? Please select 1 or more of these categories.")
+Question_8 <- survey_df_all %>% filter(T_DISP_question == "What was your biological sex assigned at birth?")
+
+
 # (supplement analysis) Group by person_id and extract records with multiple distinct survey dates
-survey_df_diff_time <- survey_df_all %>%
-  filter(question == 40192402) %>% #Think about the place you live
-  group_by(person_id) %>%
-  filter(n_distinct(survey_datetime) > 1) %>%
-  arrange(person_id, survey_datetime) %>% # sort by person
+#survey_df_diff_time <- survey_df_all %>%
+#filter(question == 40192402) %>% #Think about the place you live
+#group_by(person_id) %>%
+#filter(n_distinct(survey_datetime) > 1) %>%
+#arrange(person_id, survey_datetime) %>% # sort by person
 # There are no people answering the exposure question at multiple times......
 
-  
-#-------------------------------------------------------------------------(2)Extract participants who answered positive for household mold exposure
+
+
+
 # see: Data brower (https://databrowser.researchallofus.org/survey/social-factors-of-health/mold)
 # 40192479: Mold
 # 40192392: None of the above
@@ -62,32 +146,65 @@ survey_df_diff_time <- survey_df_all %>%
 # 40192393: Lead paint or pipes
 # 40192495: Oven or stove not working
 
+mold_question <- survey_df_all %>% filter(question == 40192402)
+mold_question_id <- mold_question %>% pull(person_id) %>% unique()
 
-mold_yes <- survey_df_all %>% filter(answer_concept_id == 40192479 & question == 40192402) %>% arrange(person_id, survey_datetime) # sort by person
+mold_yes <- mold_question %>% filter(answer_concept_id == 40192479) %>% arrange(person_id, survey_datetime) # sort by person
 mold_yes_id <- mold_yes %>% pull(person_id) %>% unique()
 
-mold_not <- survey_df_all %>% filter(answer_concept_id != 40192479 & question == 40192402) %>% arrange(person_id, survey_datetime) # sort by person
+mold_not <- mold_question %>% filter(answer_concept_id != 40192479) %>% arrange(person_id, survey_datetime) # sort by person
 mold_not_id <- mold_not %>% pull(person_id) %>% unique()
 
 View(mold_yes)
 View(mold_not)
 
 
+#----------------------------------------------------------------------------------(1-C) 
+#(A) People who have visted at least two times and answered the mold question (cohort)
+common_person_ids_0 <- intersect(visit_df_all_0$person_id, mold_question$person_id) %>% sort()
+common_person_ids_1 <- data.frame(person_id = common_person_ids_0)
 
+id_list_0 <- list(
+  common_person_ids_1$person_id,
+  Postal_code$person_id,
+  Smoking_status$person_id
+)
+
+common_person_ids_2 <- Reduce(intersect, id_list_0) %>% sort()
+common_person_ids_3 <- data.frame(person_id = common_person_ids_2)
+
+id_list_1 <- list(
+  common_person_ids_3$person_id,
+  #Question_1$person_id, Question_2$person_id,
+  Question_3$person_id, Question_4$person_id,
+  Question_5$person_id, Question_6$person_id,
+  Question_7$person_id, Question_8$person_id
+)
+
+common_person_ids_4 <- Reduce(intersect, id_list_1) %>% sort()
+common_person_ids_5 <- data.frame(person_id = common_person_ids_4)
+
+nrow(common_person_ids_5)
+nrow(common_person_ids_3)
+
+
+#(B) Among the cohort, people who have developed rheumatoid arthritis, psoriasis, or multiple sclerosis
+case_person_ids_0 <- intersect(common_person_ids$person_id, condition_df_all$person_id) %>% sort()
+case_person_ids <- data.frame(person_id = case_person_ids_0)
+
+#(C) Among the cohort, people who have not developed the diseases
+# common_person_ids にあって、condition_df_all にはない person_id を抽出
+control_person_ids_0 <- setdiff(common_person_ids$person_id, condition_df_all$person_id) %>% sort()
+control_person_ids <- data.frame(person_id = control_person_ids_0)
+
+
+nrow(common_person_ids)
+nrow(case_person_ids) + nrow(control_person_ids)
+nrow(case_person_ids)
+nrow(control_person_ids)
 
 #---------------------------------------------------------------------------------(2) Preliminary step for making Table 1
 
-# 1. Load demographic baseline data (data_person)
-target_file_12 <- file_list[12] #20261002_032143_1819351146_data_person-000000000000.csv.gz(see: (0) Preliminary step)
-local_file_12 <- "./survey_data.csv.gz"
-system(sprintf("gsutil cp %s %s", target_file_12, local_file_12))
-person_df <- read_csv(local_file_12)
-data.frame(person_df)
-
-
-# Compare total row count of person_df with the number of unique person_ids. If these two numbers match, there are no duplicates.
-nrow(person_df)
-length(unique(person_df$person_id))
 
 
 
@@ -124,6 +241,10 @@ table(df_N$T_DISP_ethnicity)
 #(3) Gender
 table(df_Y$T_DISP_gender)
 table(df_N$T_DISP_gender)
+
+
+
+
 
 
 
