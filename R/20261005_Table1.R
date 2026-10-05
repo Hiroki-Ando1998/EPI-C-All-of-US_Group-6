@@ -116,7 +116,7 @@ survey_df_all_0 <- survey_files %>%
 survey_df_all <- survey_df_all_0 %>%
   filter(as.numeric(substr(survey_datetime, 1, 4)) < 2024) %>%
   arrange(person_id)
-nrow(survey_df_before)
+nrow(survey_df_all)
 
 #table(survey_df_all$T_DISP_question)
 Question_exposure <- survey_df_all %>% filter(T_DISP_question == "Think about the place you live. Do you have problems with any of the following? Select all that apply.")
