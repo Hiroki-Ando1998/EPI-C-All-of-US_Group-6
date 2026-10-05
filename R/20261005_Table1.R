@@ -1,9 +1,10 @@
 
+install.packages("bigrquery", "tidyverse")
+
 library(bigrquery)
 library(dplyr)
 library(tidyverse)
 library(readr)
-library(tidyverse)
 
 #---------------------------------------------------------------------------------------(0) Preliminary step: Get path to the bucket in the workspace (i.e., Google Cloud)
 # 0. Get the workspace project ID (automatically loaded from environment variables)
