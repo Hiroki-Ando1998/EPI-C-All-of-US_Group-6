@@ -1,4 +1,5 @@
 
+
 library(bigrquery)
 library(dplyr)
 library(tidyverse)
@@ -149,21 +150,22 @@ Question_8 <- survey_df_all %>% filter(T_DISP_question == "What was your biologi
 mold_question <- survey_df_all %>% filter(question == 40192402)
 mold_question_id <- mold_question %>% pull(person_id) %>% unique()
 
-mold_yes <- mold_question %>% filter(answer_concept_id == 40192479) %>% arrange(person_id, survey_datetime) # sort by person
+mold_yes <- mold_question %>% filter(answer_concept_id == 40192479) %>% arrange(person_id, survey_datetime) 
 mold_yes_id <- mold_yes %>% pull(person_id) %>% unique()
 
-mold_not <- mold_question %>% filter(answer_concept_id != 40192479) %>% arrange(person_id, survey_datetime) # sort by person
+mold_not <- mold_question %>% filter(answer_concept_id != 40192479) %>% arrange(person_id, survey_datetime) 
 mold_not_id <- mold_not %>% pull(person_id) %>% unique()
 
 View(mold_yes)
 View(mold_not)
 
 
-#----------------------------------------------------------------------------------(1-C) 
-#(A) People who have visted at least two times and answered the mold question (cohort)
+#----------------------------------------------------------------------------------------------------------(3) Making cohort 
+#(A-1) People who have visted at least two times and answered the mold question (cohort)
 common_person_ids_0 <- intersect(visit_df_all_0$person_id, mold_question$person_id) %>% sort()
 common_person_ids_1 <- data.frame(person_id = common_person_ids_0)
 
+#(A-2) Among the cohort, people who provided the information on both postal_code and smoking status
 id_list_0 <- list(
   common_person_ids_1$person_id,
   Postal_code$person_id,
@@ -173,6 +175,7 @@ id_list_0 <- list(
 common_person_ids_2 <- Reduce(intersect, id_list_0) %>% sort()
 common_person_ids_3 <- data.frame(person_id = common_person_ids_2)
 
+#(A-3) Among the cohort, people who provided the additonal information on covariates furthermore
 id_list_1 <- list(
   common_person_ids_3$person_id,
   #Question_1$person_id, Question_2$person_id,
@@ -189,16 +192,16 @@ nrow(common_person_ids_3)
 
 
 #(B) Among the cohort, people who have developed rheumatoid arthritis, psoriasis, or multiple sclerosis
-case_person_ids_0 <- intersect(common_person_ids$person_id, condition_df_all$person_id) %>% sort()
+case_person_ids_0 <- intersect(common_person_ids_5$person_id, condition_df_all$person_id) %>% sort()
 case_person_ids <- data.frame(person_id = case_person_ids_0)
 
 #(C) Among the cohort, people who have not developed the diseases
 # common_person_ids にあって、condition_df_all にはない person_id を抽出
-control_person_ids_0 <- setdiff(common_person_ids$person_id, condition_df_all$person_id) %>% sort()
+control_person_ids_0 <- setdiff(common_person_ids_5$person_id, condition_df_all$person_id) %>% sort()
 control_person_ids <- data.frame(person_id = control_person_ids_0)
 
 
-nrow(common_person_ids)
+nrow(common_person_ids_5)
 nrow(case_person_ids) + nrow(control_person_ids)
 nrow(case_person_ids)
 nrow(control_person_ids)
@@ -241,13 +244,5 @@ table(df_N$T_DISP_ethnicity)
 #(3) Gender
 table(df_Y$T_DISP_gender)
 table(df_N$T_DISP_gender)
-
-
-
-
-
-
-
-
 
 
