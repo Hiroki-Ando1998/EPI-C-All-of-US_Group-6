@@ -1,5 +1,4 @@
 
-
 library(bigrquery)
 library(dplyr)
 library(tidyverse)
@@ -160,7 +159,7 @@ View(mold_yes)
 View(mold_not)
 
 
-#----------------------------------------------------------------------------------------------------------(3) Making cohort 
+#----------------------------------------------------------------------------------------------------------(3) Creating cohort 
 #(A-1) People who have visted at least two times and answered the mold question (cohort)
 common_person_ids_0 <- intersect(visit_df_all_0$person_id, mold_question$person_id) %>% sort()
 common_person_ids_1 <- data.frame(person_id = common_person_ids_0)
@@ -206,19 +205,37 @@ nrow(case_person_ids) + nrow(control_person_ids)
 nrow(case_person_ids)
 nrow(control_person_ids)
 
-#---------------------------------------------------------------------------------(2) Preliminary step for making Table 1
 
 
 
+#---------------------------------------------------------------------------------(2) Preliminary step for creating table 1
 
-# 2. Assign flags for Exposed vs. Unexposed groups
-cohort_demographics <- person_df %>% 
-  mutate(
-    exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed")
-  )
+#(a) Personal data: Assign flags for Exposed vs Unexposed groups among cohort
+person_df_filtered <- person_df %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
+cohort_demographics <- person_df_filtered %>% 
+  mutate(exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed"))
+
+
+#(b) Survay Data (e.g., income): Assign flags for Exposed vs Unexposed groups among cohort
+survay_df_filtered <- survey_df_all %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
+cohort_survay <- survay_df_filtered %>% 
+  mutate(exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed")) 
+
+#(c) Observation Data (e.g., smoking): Assign flags for Exposed vs Unexposed groups among cohort
+observation_df_filtered <- observation_df_all %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
+cohort_observation <- observation_df_filtered %>% 
+  mutate(exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed"))
+
 
 data.frame(cohort_demographics)
-View(cohort_demographics)
+data.frame(cohort_survay)
+data.frame(cohort_observation)
+
+nrow(cohort_demographics)
+nrow(cohort_survay)
+nrow(cohort_observation)
+
+#View(cohort_demographics)
 
 
 
@@ -244,5 +261,9 @@ table(df_N$T_DISP_ethnicity)
 #(3) Gender
 table(df_Y$T_DISP_gender)
 table(df_N$T_DISP_gender)
+
+
+
+
 
 
