@@ -1,5 +1,5 @@
 
-install.packages("bigrquery", "tidyverse")
+install.packages(c("bigrquery", "tidyverse"))
 
 library(bigrquery)
 library(dplyr)
