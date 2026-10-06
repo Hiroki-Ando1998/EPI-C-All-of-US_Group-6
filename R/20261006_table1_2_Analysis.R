@@ -1,6 +1,5 @@
 
-install.packages("bigrquery", "tidyverse", "gtsummary")
-
+install.packages(c("bigrquery", "tidyverse", "gtsummary"))
 
 
 library(bigrquery)
@@ -136,7 +135,10 @@ table1
 
 
 
-#-------------------------------------------------------------------------------------------------------------------------Manual: creating Table 1
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------Manual: creating Table 1 (Not need to copy!!!)
 
 df_Yes <- df_cohort %>% filter(exposure_group == "Exposed (Mold)")
 df_No <- df_cohort %>% filter(exposure_group == "Unexposed")
