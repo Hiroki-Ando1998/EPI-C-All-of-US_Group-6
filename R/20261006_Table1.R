@@ -80,11 +80,11 @@ table1 <- df_table1 %>%
       Race ~ "Race/Ethnicity",
       Sex_at_birth ~ "Sex at birth",
       Postal_code_1st ~ "Postal code (1st digit)",
-      Health_insurance ~ "Health insurance coverage",
-      House_own_rent ~ "Housing status (Own/Rent)",
-      Grade_school ~ "Education level",
-      Household_income ~ "Annual household income",
-      Employment_status ~ "Employment status",
+      Health_insurance ~ "Health insurance coverage", #"Are you covered by health insurance or some other kind of health care plan?"
+      House_own_rent ~ "Housing status (Own/Rent)",   # "Do you own or rent the place where you live?")
+      Grade_school ~ "Education level",               # "What is the highest grade or year of school you completed?")
+      Household_income ~ "Annual household income",   # "What is your annual household income from all sources?")
+      Employment_status ~ "Employment status",        # "What is your current employment status? Please select 1 or more of these categories.")
       Rheumatoid ~ "Rheumatoid arthritis",
       Psoriasis ~ "Psoriasis",
       Multiple_Sclerosis ~ "Multiple sclerosis"
