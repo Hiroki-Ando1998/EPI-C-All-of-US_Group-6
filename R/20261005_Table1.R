@@ -356,6 +356,16 @@ postal_code_N <- df_observation_N %>% filter(T_DISP_standard_concept_name == "Po
 nrow(postal_code_Y)
 nrow(postal_code_N)
 
+table(postal_code_Y$value_as_string)
+table(postal_code_N$value_as_string)
+
+
+
+
+
+
+
+
 #------------------------------------------------------------------------------------(3-D) Condition Data: outcome
 df_condition_Y <- cohort_condition %>% filter(exposure_group == "Exposed (Mold)")
 df_condition_N <- cohort_condition %>% filter(exposure_group == "Unexposed")
@@ -413,9 +423,6 @@ multiple_sclerosis_N_unique <- df_condition_N %>%
   distinct(person_id, .keep_all = TRUE) # Remove duplicates, keeping the first occurrence
 
 
-
-
-
 # Display the number of unique rows (patients)
 nrow(rheumatoid_Y_unique)
 nrow(psoriasis_Y_unique)
@@ -424,43 +431,6 @@ nrow(rheumatoid_N_unique)
 nrow(psoriasis_N_unique)
 nrow(multiple_sclerosis_N_unique)
 
-
-
-
-
-# tableオブジェクトを作成
-tab_Y <- table(df_condition_Y$T_DISP_standard_concept_name)
-
-# 「rheumatoid」が含まれる名前の数値だけを合計
-rheumatoid_Y <- sum(tab_Y[grepl("rheumatoid", names(tab_Y), ignore.case = TRUE)])
-psoriasis_Y <- sum(tab_Y[grepl("psoriasis", names(tab_Y), ignore.case = TRUE)])
-multiple_sclerosis_Y <- sum(tab_Y[grepl("multiple sclerosis", names(tab_Y), ignore.case = TRUE)])
-
-print(rheumatoid_Y)
-print(psoriasis_Y)
-print(multiple_sclerosis_Y)
-
-
-#check
-#nrow(df_condition_Y)
-#print(rheumatoid_Y + psoriasis_Y + multiple_sclerosis_Y)
-
-# tableオブジェクトを作成
-tab_N <- table(df_condition_N$T_DISP_standard_concept_name)
-
-# 「rheumatoid」が含まれる名前の数値だけを合計
-rheumatoid_N <- sum(tab_N[grepl("rheumatoid", names(tab_N), ignore.case = TRUE)])
-psoriasis_N <- sum(tab_N[grepl("psoriasis", names(tab_N), ignore.case = TRUE)])
-multiple_sclerosis_N <- sum(tab_N[grepl("multiple sclerosis", names(tab_N), ignore.case = TRUE)])
-
-print(rheumatoid_N)
-print(psoriasis_N)
-print(multiple_sclerosis_N)
-
-
-#check
-#nrow(df_condition_N)
-#print(rheumatoid_N + psoriasis_N + multiple_sclerosis_N)
 
 
 
