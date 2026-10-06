@@ -78,7 +78,7 @@ table1 <- df_table1 %>%
       Multiple_Sclerosis ~ "Multiple sclerosis"
     )
   ) %>%
-  add_p() %>%             # Calculate p-values for group comparisons (Chi-square, Fisher's exact test, etc.)
+  #add_p() %>%             # Calculate p-values for group comparisons (Chi-square, Fisher's exact test, etc.)
   add_overall() %>%       # Add an Overall column
   bold_labels()           # Make variable names bold
 
