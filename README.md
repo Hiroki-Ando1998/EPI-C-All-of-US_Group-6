@@ -32,12 +32,13 @@ We defined the study cohort within the All of Us Researcher Workbench using the 
 - Personal And Family Health History: Including yourself, who in your family has had rheumatoid arthritis (RA)?
 
 After collecting the data, we established the study cohort using R propgramming
-[R-code_cohort](https://databrowser.researchallofus.org/?_gl=1*1msoqag*_ga*MTEzOTQwMzQzMS4xNzg3OTMwMjA0*_ga_MQVR5DG2C4*czE3ODc5NTI1NTYkbzIkZzEkdDE3ODc5NTI2MDQkajEyJGwwJGgyNzc3OTI2MDc):.
+[R-code_cohort](https://github.com/Hiroki-Ando1998/EPI-C-All-of-US_Group-6/blob/main/R/20261006_Table1_1_creating_DataFramework.R):.
 1. We included individuals in the study cohort who visited the EHS at least twice **and** answered the survey question before 2024: 'Think about the place you live. Do you have problems with any of the following?
 2. From this cohort, we included **only** individuals who answered all six basic questions and provided information on postal code and current age.
-3. **Cases** were defined as individuals within the established cohort who had been diagnosed with psoriasis, rheumatoid arthritis, or multiple sclerosis.
-4. **Controls** were defined as individuals with no recorded diagnosis of psoriasis, rheumatoid arthritis, or multiple sclerosis in the EHS system.
-5. 
+3. **Exposed participants** were defined as individuals within the established cohort who reported "Mold" in response to the housing question ("Think about the place you live)
+4. **Unexposed participants** were defined as individuals who did not report "Mold" in response to the housing question.
+5. **Cases** were defined as individuals who had been diagnosed with psoriasis, rheumatoid arthritis, or multiple sclerosis.
+6. **Controls** were defined as individuals with no recorded diagnosis of psoriasis, rheumatoid arthritis, or multiple sclerosis in the EHS system.
 
 
 
