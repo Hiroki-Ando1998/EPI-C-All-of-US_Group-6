@@ -6,7 +6,6 @@ library(dplyr)
 library(tidyverse)
 library(readr)
 
-
 #---------------------------------------------------------------------------------------(0) Preliminary step: Get path to the bucket in the workspace (i.e., Google Cloud)
 # 0. Get the workspace project ID (automatically loaded from environment variables)
 project_id <- Sys.getenv("GOOGLE_PROJECT")
@@ -215,7 +214,7 @@ nrow(control_person_ids)
 
 
 
-#-----------------------------------------------------------------------------------------------------------------Creating Date Framework
+#---------------------------------------------------------------------------------------------------------------(4) Creating Data Framework
 person_df_filtered <- person_df %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
 survay_df_filtered <- survey_df_all %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
 observation_df_filtered <- observation_df_all %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
@@ -223,21 +222,27 @@ condition_df_filtered <- condition_df_all %>% filter(person_id %in% common_perso
 
 
 
+
+
+#-----------------------------------------------------------------------------(4-a) Personal data
+
 #View(person_df_filtered)
 person_df_filtered_1 <- person_df_filtered %>% select(person_id, date_of_birth, T_DISP_race, T_DISP_sex_at_birth)
 colnames(person_df_filtered_1) <- c("person_id", "Date_of_birth", "Race", "Sex_at_birth")
 
 
-#postal code
+
+#-----------------------------------------------------------------------------(4-b) postal code data
+
 postal_code_1 <- observation_df_filtered %>% filter(T_DISP_standard_concept_name == "Postal code [Location]") %>%
   select(person_id, observation_datetime , value_as_string)
 colnames(postal_code_1) <- c("person_id", "Observation_time", "Postal_code")
 
 
 
+#------------------------------------------------------------------------------(4-c) Condition data
 
 
-#Condition data
 Question_3_1 <- survay_df_filtered %>% filter(T_DISP_question == "Are you covered by health insurance or some other kind of health care plan?") %>%
   select(person_id, survey_datetime, T_DISP_answer)
 colnames(Question_3_1) <- c("person_id", "survey_datetime", "Health_insurance")
@@ -259,17 +264,31 @@ Question_7_1 <- survay_df_filtered %>% filter(T_DISP_question == "What was your 
   select(person_id, T_DISP_answer)
 colnames(Question_7_1) <- c("person_id", "Biological_sex")
 
-Question_8_1 <- survay_df_filtered %>% filter(T_DISP_question == "What is your current employment status? Please select 1 or more of these categories.") %>%
-  select(person_id, survey_datetime, T_DISP_answer)
-colnames(Question_8_1) <- c("person_id", "survey_datetime", "Employment_status")
 
 
-# 重複（2回以上出現）している ID の行をすべて抽出
-duplicates <- Question_8_1 %>%
-  add_count(person_id_8) %>%
-  filter(n > 1) %>%
-  select(-n) # カウント用に追加された列 n を削除
+Question_8_1_0 <- survay_df_filtered %>% filter(T_DISP_question == "What is your current employment status? Please select 1 or more of these categories.") %>%
+  select(person_id, T_DISP_answer)
+colnames(Question_8_1_0) <- c("person_id", "Employment_status")
 
+Question_8_1 <- Question_8_1_0 %>%
+  group_by(person_id) %>%
+  mutate(
+    # Define priority ranks for employment statuses (1 = highest priority)
+    rank = case_when(
+      Employment_status == "Student"                   ~ 1,
+      Employment_status == "Unable To Work"            ~ 2,
+      Employment_status == "Retired"                   ~ 3,
+      Employment_status == "Employed For Wages"        ~ 4,
+      Employment_status == "Homemaker"                 ~ 5,
+      Employment_status == "Self Employed"             ~ 6,
+      Employment_status == "Out Of Work Less Than One" ~ 7,
+      TRUE                                            ~ 99 # All other statuses
+    )
+  ) %>%
+  # Keep only the row(s) with the highest priority rank for each person_id
+  filter(rank == min(rank)) %>%
+  select(-rank) %>% # Remove the temporary rank column
+  ungroup()
 
 
 
@@ -279,16 +298,16 @@ df_1 <- person_df_filtered_1 %>%
   left_join(Question_4_1, by = "person_id") %>%
   left_join(Question_5_1, by = "person_id") %>%
   left_join(Question_6_1, by = "person_id") %>%
-  left_join(Question_7_1, by = "person_id")
+  left_join(Question_7_1, by = "person_id") %>%
+  left_join(Question_8_1, by = "person_id")
 
 
 
 
+#-------------------------------------------------------------------------(4-D) outcome data
 
-
-
-
-
+  
+  
 #(A)------Filter conditions containing "rheumatoid" (case-insensitive)
 
 # Create a dataframe with unique person_ids (# Remove duplicates, keeping the first occurrence )
@@ -313,11 +332,7 @@ df_merged_2 <- df_1 %>%
 
 
 
-
-
-
-#(B)------Filter conditions containing "psoriasis" (case-insensitive): Exposed
-# Create a dataframe with unique person_ids (# Remove duplicates, keeping the first occurrence )
+#(B)------Filter conditions containing "psoriasis" (case-insensitive)
 psoriasis_unique <- condition_df_filtered %>%
   filter(str_detect(T_DISP_standard_concept_name, regex("psoriasis", ignore_case = TRUE))) %>%
   distinct(person_id, .keep_all = TRUE) %>%
@@ -338,7 +353,7 @@ df_merged_3 <- df_merged_2 %>%
 
 
 
-#(C)------Filter conditions containing "multiple sclerosis" (case-insensitive): Exposed
+#(C)------Filter conditions containing "multiple sclerosis" (case-insensitive)
 sclerosis_unique <- condition_df_filtered %>%
   filter(str_detect(T_DISP_standard_concept_name, regex("sclerosis", ignore_case = TRUE))) %>%
   distinct(person_id, .keep_all = TRUE) %>%
@@ -358,7 +373,7 @@ df_merged_4 <- df_merged_3 %>%
 
 
 
-#Assign flags for Exposed vs Unexposed groups among cohort
+#-------------------------------------------------------------------------(4-E) Assign flags for Exposed vs Unexposed groups among cohort
 # Pick up surveydate among people exposed to household mold
 mold_yes <- mold_question %>% filter(answer_concept_id == 40192479) %>% arrange(person_id, survey_datetime) 
 mold_yes_filtered <- mold_yes %>% semi_join(df_merged_4, by = "person_id") %>% select(person_id, survey_datetime)
@@ -371,6 +386,25 @@ mold_merged <- rbind(mold_yes_filtered, mold_no_filtered)
 df_merged_5 <- df_merged_4 %>% left_join(mold_merged, by = "person_id")
 
 
-#------Finalized data file
+
+
+#-------------------------Finalized data file
 df_cohort_finalized <- df_merged_5 %>% mutate(exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed"))
 View(df_cohort_finalized)
+
+
+
+
+#------------------------Save the created datafrmaework in Bucket of the workbench
+
+# 1. Specify the target bucket path
+my_target_bucket <- "gs://inflammatory-disease-plus-mold-exposure-5-wb-meteoric-aubergine/"
+
+# 2. Save the data frame as a local temporary CSV file
+write.csv(df_cohort_finalized, "20261006_df_cohort_finalized.csv", row.names = FALSE)
+
+# 3. Transfer (copy) the CSV file to the specified bucket
+system(sprintf("gsutil cp 20261006_df_cohort_finalized.csv %s", my_target_bucket))
+
+# 4. Verify that the file was successfully uploaded to the bucket
+system(sprintf("gsutil ls %s", my_target_bucket))
