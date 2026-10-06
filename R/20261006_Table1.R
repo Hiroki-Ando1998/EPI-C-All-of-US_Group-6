@@ -30,7 +30,8 @@ df_table1 <- df_cohort %>%
   mutate(
     # Create age categories based on birth date
     Age_group_char = case_when(
-      Date_of_birth >= "2000-01-01" ~ "<26 years (Born 2000 or later)",
+      Date_of_birth >= "2007-01-01" ~ "<26 years (Born 2007 or later)",
+       Date_of_birth >= "2000-01-01" & Date_of_birth < "2007-01-01" ~ "18–25 years (Born 2000–2007)",     
       Date_of_birth >= "1985-01-01" & Date_of_birth < "2000-01-01" ~ "26–41 years (Born 1985–1999)",
       Date_of_birth >= "1965-01-01" & Date_of_birth < "1985-01-01" ~ "42–60 years (Born 1965–1984)",
       Date_of_birth < "1965-01-01" ~ "≥61 years (Born before 1965)",
@@ -40,7 +41,8 @@ df_table1 <- df_cohort %>%
     Age_group = factor(
       Age_group_char,
       levels = c(
-        "<26 years (Born 2000 or later)",
+        "<18 years (Born 2007 or later)",
+        "<18-25 years (Born 2000-2007)",
         "26–41 years (Born 1985–1999)",
         "42–60 years (Born 1965–1984)",
         "≥61 years (Born before 1965)"
