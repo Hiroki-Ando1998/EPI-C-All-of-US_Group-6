@@ -215,7 +215,7 @@ nrow(control_person_ids)
 
 
 
-#-----------------------------------------------------------------------------------------Data gathering
+#-----------------------------------------------------------------------------------------------------------------Creating Date Framework
 person_df_filtered <- person_df %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
 survay_df_filtered <- survey_df_all %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
 observation_df_filtered <- observation_df_all %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
