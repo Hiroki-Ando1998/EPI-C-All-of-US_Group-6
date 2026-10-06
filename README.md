@@ -13,7 +13,7 @@ To investigate the association between mold exposure and inflammatory diseases, 
 We conduct a retrospective cohort study using data from the All of Us Research Program. The study population consists of participants aged ≥18 years residing in the Southwest, South, Midwest, or the Northeast of the US. Participants with missing information on either the exposure or outcome are excluded from the analytic population. The primary outcome is inflammatory disease, specifically rheumatoid arthritis, psoriasis, and multiple sclerosis, which is defined using phecodes. The primary exposure is household mold exposure, which is assessed using self-reported information from the Social Factors Survey. The mold exposure level is corroborated using proxy measures, including housing conditions, water leaks, and potentially indoor air quality, as well as environmental data from the U.S. Environmental Protection Agency. Potential confounding variables and effect modifiers will be identified based on previous literature. Potential confounders include age, sex, drinking, smoking, and education. Potential effect modifiers include income, health insurance coverage, housing type, and neighborhood condition.
 
 #### 2-A: Cohort 
-We defined the study cohort within the All of Us Researcher Workbench using the following eligibility criteria 
+We collected the data for establishing the study cohort within the All of Us Researcher Workbench using the following eligibility criteria 
 [All of US Data Browser](https://databrowser.researchallofus.org/?_gl=1*1msoqag*_ga*MTEzOTQwMzQzMS4xNzg3OTMwMjA0*_ga_MQVR5DG2C4*czE3ODc5NTI1NTYkbzIkZzEkdDE3ODc5NTI2MDQkajEyJGwwJGgyNzc3OTI2MDc):
 - Visit (inpatient or outpatinet visits) at least twice
 - Social Determinants Of Health: Think about the place you live. Do you have problems with any of the following? 
@@ -32,7 +32,7 @@ We defined the study cohort within the All of Us Researcher Workbench using the 
 - Personal And Family Health History: Including yourself, who in your family has had rheumatoid arthritis (RA)?
 
 After collecting the data, we established the study cohort using R propgramming
-[R-code_cohort](https://github.com/Hiroki-Ando1998/EPI-C-All-of-US_Group-6/blob/main/R/20261006_Table1_1_creating_DataFramework.R):.
+[R-code_cohort](https://github.com/Hiroki-Ando1998/EPI-C-All-of-US_Group-6/blob/main/R/20261006_Table1_1_creating_DataFramework.R):
 1. We included individuals in the study cohort who visited the EHS at least twice **and** answered the survey question before 2024: 'Think about the place you live. Do you have problems with any of the following?
 2. From this cohort, we included **only** individuals who answered all six basic questions and provided information on postal code and current age.
 3. **Exposed participants** were defined as individuals within the established cohort who reported "Mold" in response to the housing question ("Think about the place you live)
