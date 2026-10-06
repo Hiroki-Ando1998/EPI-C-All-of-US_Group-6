@@ -1,12 +1,14 @@
 
-install.packages("bigrquery", "tidyverse")
+install.packages("bigrquery", "tidyverse", "gtsummary")
+
 
 
 library(bigrquery)
 library(dplyr)
 library(tidyverse)
 library(readr)
-
+library(tidyverse)
+library(gtsummary)
 
 #-------------------------------------------------------------------------- Get path to the bucket in the workspace (i.e., Google Cloud)
 # 1. Specify the GCS file path and local file name
@@ -20,8 +22,92 @@ View(df_cohort)
 
 
 
+#--------------------------------------------------------------------------------------------------Rpakcage: Creating Table 1
 
-#-------------------------------------------------------------------------------------------------------------------------(Table 1)
+# Data preprocessing (Create age groups and extract the 1st digit of postal code)
+
+df_table1 <- df_cohort %>%
+  mutate(
+    # Create age categories based on birth date
+    Age_group = case_when(
+      Date_of_birth < "1965-01-01" ~ "≥61 years (Born before 1965)",
+      Date_of_birth >= "1985-01-01" & Date_of_birth < "2000-01-01" ~ "26–41 years (Born 1985–1999)",
+      Date_of_birth >= "2000-01-01" ~ "<26 years (Born 2000 or later)",
+      TRUE ~ "42–60 years (Born 1965–1984)"
+    ),
+    # Extract the first digit of the postal code
+    Postal_code_1st = substr(Postal_code, 1, 1)
+  )
+
+
+
+# Create Table 1 using gtsummary
+table1 <- df_table1 %>%
+  # Select variables to include in Table 1
+  select(
+    exposure_group,       # Grouping variable (Exposed vs Unexposed)
+    Age_group,
+    Race,
+    Sex_at_birth,
+    Postal_code_1st,
+    Health_insurance,
+    House_own_rent,
+    Grade_school,
+    Household_income,
+    Employment_status,
+    Rheumatoid,
+    Psoriasis,
+    Multiple_Sclerosis
+  ) %>%
+  # Generate summary table
+  tbl_summary(
+    by = exposure_group, # Compare across exposure groups
+    missing = "ifany",   # Display missing values (NA) only if present
+    label = list(        # Define variable labels for display
+      Age_group ~ "Age group",
+      Race ~ "Race/Ethnicity",
+      Sex_at_birth ~ "Sex at birth",
+      Postal_code_1st ~ "Postal code (1st digit)",
+      Health_insurance ~ "Health insurance coverage",
+      House_own_rent ~ "Housing status (Own/Rent)",
+      Grade_school ~ "Education level",
+      Household_income ~ "Annual household income",
+      Employment_status ~ "Employment status",
+      Rheumatoid ~ "Rheumatoid arthritis",
+      Psoriasis ~ "Psoriasis",
+      Multiple_Sclerosis ~ "Multiple sclerosis"
+    )
+  ) %>%
+  add_p() %>%             # Calculate p-values for group comparisons (Chi-square, Fisher's exact test, etc.)
+  add_overall() %>%       # Add an Overall column
+  bold_labels()           # Make variable names bold
+
+# 4. Display the table in the console
+table1
+
+
+# 5. Export options (Word / CSV)
+# Export as a Word document (.docx)
+# table1 %>%
+#   as_flex_table() %>%
+#   flextable::save_as_docx(path = "Table1_Baseline_Characteristics.docx")
+# 
+# # Export as a CSV file
+# table1 %>%
+#   as_tibble() %>%
+#   write.csv("Table1_Baseline_Characteristics.csv", row.names = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+#-------------------------------------------------------------------------------------------------------------------------Manual: creating Table 1
 
 df_Yes <- df_cohort %>% filter(exposure_group == "Exposed (Mold)")
 df_No <- df_cohort %>% filter(exposure_group == "Unexposed")
@@ -29,9 +115,6 @@ df_No <- df_cohort %>% filter(exposure_group == "Unexposed")
 
 nrow(df_Yes) #the numner of peopled exposed to household mold
 nrow(df_No) # the numner of peopled not exposed to household mold
-
-
-
 
 
 col_names <- colnames(df_Yes)
@@ -115,6 +198,11 @@ table(df_No$Psoriasis)
 #Outcome: Multiple_Sclerosis
 table(df_Yes$Multiple_Sclerosis)
 table(df_No$Multiple_Sclerosis)
+
+
+
+
+
 
 
 
