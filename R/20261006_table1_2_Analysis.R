@@ -24,16 +24,42 @@ View(df_cohort)
 
 #--------------------------------------------------------------------------------------------------Rpakcage: Creating Table 1
 
+#-------------------------------------------------------------------------- Get path to the bucket in the workspace (i.e., Google Cloud)
+# 1. Specify the GCS file path and local file name
+gcs_file_path <- "gs://inflammatory-disease-plus-mold-exposure-5-wb-meteoric-aubergine/20261006_df_cohort_finalized.csv"
+system(sprintf("gsutil cp %s .", gcs_file_path))
+
+
+#2. Read the CSV file into a data frame
+df_cohort <- read.csv("20261006_df_cohort_finalized.csv")
+View(df_cohort)
+
+
+
+#--------------------------------------------------------------------------------------------------Rpakcage: Creating Table 1
+
 # Data preprocessing (Create age groups and extract the 1st digit of postal code)
 
+# 2. Data preprocessing (Create age groups as an ordered factor)
 df_table1 <- df_cohort %>%
   mutate(
     # Create age categories based on birth date
-    Age_group = case_when(
-      Date_of_birth < "1965-01-01" ~ "≥61 years (Born before 1965)",
-      Date_of_birth >= "1985-01-01" & Date_of_birth < "2000-01-01" ~ "26–41 years (Born 1985–1999)",
+    Age_group_char = case_when(
       Date_of_birth >= "2000-01-01" ~ "<26 years (Born 2000 or later)",
-      TRUE ~ "42–60 years (Born 1965–1984)"
+      Date_of_birth >= "1985-01-01" & Date_of_birth < "2000-01-01" ~ "26–41 years (Born 1985–1999)",
+      Date_of_birth >= "1965-01-01" & Date_of_birth < "1985-01-01" ~ "42–60 years (Born 1965–1984)",
+      Date_of_birth < "1965-01-01" ~ "≥61 years (Born before 1965)",
+      TRUE ~ NA_character_
+    ),
+    # Set the explicit order of categories (Youngest to Oldest)
+    Age_group = factor(
+      Age_group_char,
+      levels = c(
+        "<26 years (Born 2000 or later)",
+        "26–41 years (Born 1985–1999)",
+        "42–60 years (Born 1965–1984)",
+        "≥61 years (Born before 1965)"
+      )
     ),
     # Extract the first digit of the postal code
     Postal_code_1st = substr(Postal_code, 1, 1)
@@ -96,6 +122,9 @@ table1
 # table1 %>%
 #   as_tibble() %>%
 #   write.csv("Table1_Baseline_Characteristics.csv", row.names = FALSE)
+
+
+
 
 
 
