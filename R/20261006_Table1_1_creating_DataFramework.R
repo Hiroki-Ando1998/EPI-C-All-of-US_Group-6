@@ -378,12 +378,15 @@ df_merged_4 <- df_merged_3 %>%
 mold_yes <- mold_question %>% filter(answer_concept_id == 40192479) %>% arrange(person_id, survey_datetime) 
 mold_yes_filtered <- mold_yes %>% semi_join(df_merged_4, by = "person_id") %>% select(person_id, survey_datetime)
 
-mold_no <- mold_question %>% filter(answer_concept_id != 40192479) %>% arrange(person_id, survey_datetime) 
-mold_no_filtered <- mold_no %>% semi_join(df_merged_4, by = "person_id") %>% select(person_id, survey_datetime)
+df_not_in_mold <- df_merged_4 %>% anti_join(mold_yes_filtered, by = "person_id") %>% select(person_id)
+mold_no_filtered <- mold_question %>% semi_join(df_not_in_mold, by = "person_id") %>% 
+  select(person_id, survey_datetime) %>% distinct(person_id, .keep_all = TRUE)
 
 
 mold_merged <- rbind(mold_yes_filtered, mold_no_filtered)
 df_merged_5 <- df_merged_4 %>% left_join(mold_merged, by = "person_id")
+
+
 
 
 
