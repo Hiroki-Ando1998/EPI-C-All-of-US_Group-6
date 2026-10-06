@@ -392,8 +392,14 @@ df_merged_5 <- df_merged_4 %>% left_join(mold_merged, by = "person_id")
 
 
 #-------------------------Finalized data file
-df_cohort_finalized <- df_merged_5 %>% mutate(exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed"))
+df_cohort_finalized <- df_merged_5 %>% mutate(exposure_group = if_else(person_id %in% mold_yes_filtered$person_id, "Exposed (Mold)", "Unexposed"))
 View(df_cohort_finalized)
+
+#df_Yes <- df_cohort_finalized %>% filter(exposure_group == "Exposed (Mold)")
+#df_No <- df_cohort_finalized %>% filter(exposure_group == "Unexposed")
+
+#nrow(df_Yes)
+#nrow(df_No)
 
 
 
