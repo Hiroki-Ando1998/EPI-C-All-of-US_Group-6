@@ -356,8 +356,10 @@ postal_code_N <- df_observation_N %>% filter(T_DISP_standard_concept_name == "Po
 nrow(postal_code_Y)
 nrow(postal_code_N)
 
-table(postal_code_Y$value_as_string)
-table(postal_code_N$value_as_string)
+
+#Extract the first character of postal code and cross-tabulate.
+table(substr(postal_code_Y$value_as_string, 1, 1))
+table(substr(postal_code_N$value_as_string, 1, 1))
 
 
 
