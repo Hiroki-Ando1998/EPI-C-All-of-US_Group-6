@@ -6,7 +6,6 @@ library(bigrquery)
 library(dplyr)
 library(tidyverse)
 library(readr)
-library(tidyverse)
 library(gtsummary)
 
 #-------------------------------------------------------------------------- Get path to the bucket in the workspace (i.e., Google Cloud)
