@@ -40,7 +40,7 @@ After collecting the data, we established the study cohort using R propgramming
 5. **Cases** were defined as individuals who had been diagnosed with psoriasis, rheumatoid arthritis, or multiple sclerosis.
 6. **Controls** were defined as individuals with no recorded diagnosis of psoriasis, rheumatoid arthritis, or multiple sclerosis in the EHS system.
 
-The establsihed cohort can be checked by writing "view(df_cohort)" in the [R-code_Table1](https://github.com/Hiroki-Ando1998/EPI-C-All-of-US_Group-6/blob/main/R/20261006_Table1.R) and baseline characteristic of the cohort is also available in the same Rcode.
+The establsihed cohort can be checked by writing "view(df_cohort)" in the [R-code_Table1](https://github.com/Hiroki-Ando1998/EPI-C-All-of-US_Group-6/blob/main/R/20261006_Table1.R) and **baseline characteristics of the cohort** is also available in the same Rcode.
 
 
 
