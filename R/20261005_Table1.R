@@ -116,7 +116,7 @@ survey_df_all_0 <- survey_files %>%
 survey_df_all <- survey_df_all_0 %>%
   filter(as.numeric(substr(survey_datetime, 1, 4)) < 2024) %>%
   arrange(person_id)
-nrow(survey_df_all)
+
 
 #table(survey_df_all$T_DISP_question)
 Question_exposure <- survey_df_all %>% filter(T_DISP_question == "Think about the place you live. Do you have problems with any of the following? Select all that apply.")
@@ -201,7 +201,6 @@ case_person_ids_0 <- intersect(common_person_ids_5$person_id, condition_df_all$p
 case_person_ids <- data.frame(person_id = case_person_ids_0)
 
 #(C) Among the cohort, people who have not developed the diseases
-# common_person_ids にあって、condition_df_all にはない person_id を抽出
 control_person_ids_0 <- setdiff(common_person_ids_5$person_id, condition_df_all$person_id) %>% sort()
 control_person_ids <- data.frame(person_id = control_person_ids_0)
 
@@ -233,9 +232,16 @@ cohort_observation <- observation_df_filtered %>%
   mutate(exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed"))
 
 
+#(D) Condition Data (outcome): Assign flags for Exposed vs Unexposed groups among cohort
+condition_df_filtered <- condition_df_all %>% filter(person_id %in% common_person_ids_5$person_id) %>% arrange(person_id)
+cohort_condition <- condition_df_filtered %>% 
+  mutate(exposure_group = if_else(person_id %in% mold_yes_id, "Exposed (Mold)", "Unexposed"))
+
+
 data.frame(cohort_demographics)
 data.frame(cohort_survay)
 data.frame(cohort_observation)
+data.frame(cohort_condition)
 
 nrow(cohort_demographics)
 nrow(cohort_survay)
@@ -244,7 +250,9 @@ nrow(cohort_observation)
 #View(cohort_demographics)
 
 #--------------------------------------------------------------------------------------------------(3) Table 1
-#(1) survay data
+
+
+#---------------------------------------------------------------------------(3-A) survay data
 df_survay_Y <- cohort_survay %>% filter(exposure_group == "Exposed (Mold)")
 df_survay_N <- cohort_survay %>% filter(exposure_group == "Unexposed")
 
@@ -305,4 +313,154 @@ table(Question_7_N$T_DISP_answer)
 # What was your biological sex assigned at birth?
 table(Question_8_Y$T_DISP_answer)
 table(Question_8_N$T_DISP_answer)
+
+
+
+#--------------------------------------------------------------------------------------(3-B) Demographic (Date of birth)
+df_demographic_Y <- cohort_demographics %>% filter(exposure_group == "Exposed (Mold)")
+df_demographic_N <- cohort_demographics %>% filter(exposure_group == "Unexposed")
+
+#check
+#nrow(common_person_ids_5)
+#nrow(df_demographic_Y) + nrow(df_demographic_N)
+
+
+table(df_demographic_Y$date_of_birth)
+table(df_demographic_N$date_of_birth)
+
+
+#people born before 1955 (> almost 55 years old)
+sum(df_demographic_Y$date_of_birth < "1965-01-01", na.rm = TRUE)
+sum(df_demographic_N$date_of_birth < "1965-01-01", na.rm = TRUE)
+
+#people born after 1985 and before 2000 (almost 18-35 years old)
+sum(df_demographic_Y$date_of_birth > "1985-01-01" & df_demographic_Y$date_of_birth < "2000-01-01", na.rm = TRUE)
+sum(df_demographic_N$date_of_birth > "1985-01-01" & df_demographic_N$date_of_birth < "2000-01-01", na.rm = TRUE)
+
+#people born after 2000 (< almost 18 years old)
+sum(df_demographic_Y$date_of_birth > "2000-01-01", na.rm = TRUE)
+sum(df_demographic_N$date_of_birth > "2000-01-01", na.rm = TRUE)
+
+#------------------------------------------------------------------------------------(3-C) observation (postal_code and taboco smoking)
+df_observation_Y <- cohort_observation %>% filter(exposure_group == "Exposed (Mold)")
+df_observation_N <- cohort_observation %>% filter(exposure_group == "Unexposed")
+
+postal_code_Y <- df_observation_Y %>% filter(T_DISP_standard_concept_name == "Postal code [Location]")
+postal_code_N <- df_observation_N %>% filter(T_DISP_standard_concept_name == "Postal code [Location]")
+#smoking_code_Y <- df_observation_Y %>% filter(T_DISP_standard_concept_name == "Tobacco_smoking_status")
+#smoking_code_N <- df_observation_N %>% filter(T_DISP_standard_concept_name == "Tobacco_smoking_status")
+
+#check
+#nrow(common_person_ids_5)
+#nrow(postal_code_Y) + nrow(postal_code_N)
+nrow(postal_code_Y)
+nrow(postal_code_N)
+
+#------------------------------------------------------------------------------------(3-D) Condition Data: outcome
+df_condition_Y <- cohort_condition %>% filter(exposure_group == "Exposed (Mold)")
+df_condition_N <- cohort_condition %>% filter(exposure_group == "Unexposed")
+
+
+#(A)------Filter conditions containing "rheumatoid" (case-insensitive)
+rheumatoid_Y <- df_condition_Y %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("rheumatoid", ignore_case = TRUE)))
+# Create a dataframe with unique person_ids
+rheumatoid_Y_unique <- df_condition_Y %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("rheumatoid", ignore_case = TRUE))) %>%
+  distinct(person_id, .keep_all = TRUE) # Remove duplicates, keeping the first occurrence
+
+
+# Filter conditions containing "rheumatoid" (case-insensitive)
+rheumatoid_N <- df_condition_N %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("rheumatoid", ignore_case = TRUE)))
+rheumatoid_N_unique <- df_condition_N %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("rheumatoid", ignore_case = TRUE))) %>%
+  distinct(person_id, .keep_all = TRUE) # Remove duplicates, keeping the first occurrence
+
+
+
+#(B)------Filter conditions containing "psoriasis" (case-insensitive): Exposed
+psoriasis_Y <- df_condition_Y %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("psoriasis", ignore_case = TRUE)))
+# Create a dataframe with unique person_ids
+psoriasis_Y_unique <- df_condition_Y %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("psoriasis", ignore_case = TRUE))) %>%
+  distinct(person_id, .keep_all = TRUE) # Remove duplicates, keeping the first occurrence
+
+
+# Filter conditions containing "psoriasis" (case-insensitive): Not exposed
+psoriasis_N <- df_condition_N %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("psoriasis", ignore_case = TRUE)))
+psoriasis_N_unique <- df_condition_N %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("psoriasis", ignore_case = TRUE))) %>%
+  distinct(person_id, .keep_all = TRUE) # Remove duplicates, keeping the first occurrence
+
+
+#(C)------Filter conditions containing "multiple sclerosis" (case-insensitive): Exposed
+multiple_sclerosis_Y <- df_condition_Y %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("sclerosis", ignore_case = TRUE)))
+# Create a dataframe with unique person_ids
+multiple_sclerosis_Y_unique <- df_condition_Y %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("sclerosis", ignore_case = TRUE))) %>%
+  distinct(person_id, .keep_all = TRUE) # Remove duplicates, keeping the first occurrence
+
+
+# Filter conditions containing "psoriasis" (case-insensitive): Not exposed
+multiple_sclerosis_N <- df_condition_N %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("sclerosis", ignore_case = TRUE)))
+multiple_sclerosis_N_unique <- df_condition_N %>%
+  filter(str_detect(T_DISP_standard_concept_name, regex("sclerosis", ignore_case = TRUE))) %>%
+  distinct(person_id, .keep_all = TRUE) # Remove duplicates, keeping the first occurrence
+
+
+
+
+
+# Display the number of unique rows (patients)
+nrow(rheumatoid_Y_unique)
+nrow(psoriasis_Y_unique)
+nrow(multiple_sclerosis_Y_unique)
+nrow(rheumatoid_N_unique)
+nrow(psoriasis_N_unique)
+nrow(multiple_sclerosis_N_unique)
+
+
+
+
+
+# tableオブジェクトを作成
+tab_Y <- table(df_condition_Y$T_DISP_standard_concept_name)
+
+# 「rheumatoid」が含まれる名前の数値だけを合計
+rheumatoid_Y <- sum(tab_Y[grepl("rheumatoid", names(tab_Y), ignore.case = TRUE)])
+psoriasis_Y <- sum(tab_Y[grepl("psoriasis", names(tab_Y), ignore.case = TRUE)])
+multiple_sclerosis_Y <- sum(tab_Y[grepl("multiple sclerosis", names(tab_Y), ignore.case = TRUE)])
+
+print(rheumatoid_Y)
+print(psoriasis_Y)
+print(multiple_sclerosis_Y)
+
+
+#check
+#nrow(df_condition_Y)
+#print(rheumatoid_Y + psoriasis_Y + multiple_sclerosis_Y)
+
+# tableオブジェクトを作成
+tab_N <- table(df_condition_N$T_DISP_standard_concept_name)
+
+# 「rheumatoid」が含まれる名前の数値だけを合計
+rheumatoid_N <- sum(tab_N[grepl("rheumatoid", names(tab_N), ignore.case = TRUE)])
+psoriasis_N <- sum(tab_N[grepl("psoriasis", names(tab_N), ignore.case = TRUE)])
+multiple_sclerosis_N <- sum(tab_N[grepl("multiple sclerosis", names(tab_N), ignore.case = TRUE)])
+
+print(rheumatoid_N)
+print(psoriasis_N)
+print(multiple_sclerosis_N)
+
+
+#check
+#nrow(df_condition_N)
+#print(rheumatoid_N + psoriasis_N + multiple_sclerosis_N)
+
+
 
