@@ -53,8 +53,126 @@ df_table1 <- df_cohort %>%
   )
 
 
+df_cohort_modified <- df_table1 %>%
+  mutate(Sex_at_birth = case_when(
+    Sex_at_birth == "Male"   ~ "male",
+    Sex_at_birth == "Female" ~ "female",
+    TRUE                     ~ "unspecified"
+  )) %>%
+  mutate(Race = case_when(
+    Race == "White" ~ "White",
+    Race %in% c("Black or African American") ~ "Black",
+    Race == "Asian" ~ "Asian",
+    Race %in% c("I prefer not to answer", "None Indicated", "None of these", "Skip") ~ "unspecified",    
+    TRUE ~ "Other"
+  )) %>%
+  mutate(Grade_school = case_when(
+    Grade_school %in% c("One Through Four", "Five Through Eight", "Nine Through Eleven") ~ "Less than High School",
+    Grade_school == "Twelve Or GED" ~ "High School grad or equivalent",
+    Grade_school == "College One to Three" ~ "Some college/associate",
+    Grade_school %in% c("College Graduate", "Advanced Degree") ~ "college degreee or higher",    
+    TRUE ~ "unspecified"
+  ))%>%
+  mutate(Postal_code_1st = case_when(
+    Postal_code_1st %in% c("0", "1") ~ "Northeast",
+    Postal_code_1st %in% c("4", "5", "6") ~ "Midwest",
+    Postal_code_1st %in% c("2", "3", "7") ~ "South",
+    TRUE ~ "West"
+  ))%>%
+  mutate(Health_insurance = case_when(
+    Health_insurance == "Yes" ~ "Yes",
+    Health_insurance == "No" ~ "No",
+    TRUE ~ "Unspecified"
+  ))%>%
+  mutate(Employment_status = case_when(
+    Employment_status %in% c("Employed For Wages", "Self Employed") ~ "Employed",
+    Employment_status %in% c("Unable To Work", "Out Of Work One Or More", "Homemaker", "Out Of Work Less Than One") ~ "Unemployed",
+    Employment_status == "Retired" ~ "Retired",
+    TRUE ~ "Other"
+  ))%>%
+  mutate(Household_income = case_when(
+    Household_income %in% c("less 10k", "10k 25k") ~ "<25k",
+    Household_income %in% c("25k 35k", "35k 50k") ~ "25-49k",
+    Household_income %in% c("50k 75k") ~ "50-74k",
+    Household_income %in% c("75k 100k") ~ "75-99k",
+    Household_income %in% c("100k 150k", "150k 200k", "more 200k") ~ "More than 100k",
+    TRUE ~ "unspecified"
+  ))%>%
+  mutate(House_own_rent = case_when(
+    House_own_rent %in% c("Own") ~ "Own",
+    House_own_rent %in% c("Rent") ~ "Rent",
+    TRUE ~ "unspecified"
+  ))%>%
+  mutate(Rheumatoid_EHS = case_when(
+    Rheumatoid_EHS %in% c("None") ~ "None",
+    TRUE ~ "Yes"
+  ))%>%
+  mutate(Multiple_Sclerosis_EHS = case_when(
+    Multiple_Sclerosis_EHS %in% c("None") ~ "None",
+    TRUE ~ "Yes"
+  ))%>%
+  mutate(Psoriasis_EHS = case_when(
+    Psoriasis_EHS %in% c("None") ~ "None",
+    TRUE ~ "Yes"
+  ))
 
-# Create Table 1 using gtsummary
+
+
+
+#-----------------------------------------------------------------------Table 1
+
+table1_modified <- df_cohort_modified %>%
+  # Select variables to include in Table 1
+  select(
+    exposure_group,       # Grouping variable (Exposed vs Unexposed)
+    Age_group,
+    Race,
+    Sex_at_birth,
+    Postal_code_1st,
+    Health_insurance,
+    House_own_rent,
+    Grade_school,
+    Household_income,
+    Employment_status,
+    Rheumatoid_EHS,
+    rheumatoid_self_Report,
+    Multiple_Sclerosis_EHS,
+    multiple_sclerosis_self_Report,
+    Psoriasis_EHS,
+  ) %>%
+  # Generate summary table
+  tbl_summary(
+    by = exposure_group, # Compare across exposure groups
+    missing = "ifany",   # Display missing values (NA) only if present
+    label = list(        # Define variable labels for display
+      Age_group ~ "Age group",
+      Race ~ "Race/Ethnicity",
+      Sex_at_birth ~ "Sex at birth",
+      Postal_code_1st ~ "Postal code (1st digit)",
+      Health_insurance ~ "Health insurance coverage", #"Are you covered by health insurance or some other kind of health care plan?"
+      House_own_rent ~ "Housing status (Own/Rent)",   # "Do you own or rent the place where you live?")
+      Grade_school ~ "Education level",               # "What is the highest grade or year of school you completed?")
+      Household_income ~ "Annual household income",   # "What is your annual household income from all sources?")
+      Employment_status ~ "Employment status",        # "What is your current employment status? Please select 1 or more of these categories.")
+      Psoriasis_EHS ~ "Psoriasis_EHS",
+      Rheumatoid_EHS ~ "Rheumatoid arthritis_EHS",
+      rheumatoid_self_Report ~ "Rheumatoid arthritis_Self_Report",        #"Including yourself, who in your family has had rheumatoid arthritis (RA)? self."
+      Multiple_Sclerosis_EHS ~ "Multiple sclerosis_EHS",
+      multiple_sclerosis_self_Report ~ "Multiple sclerosis_Self_Report"   #"Including yourself, who in your family has had multiple sclerosis (MS)? self."
+    )
+  ) %>%
+  #add_p() %>%             # Calculate p-values for group comparisons (Chi-square, Fisher's exact test, etc.)
+  add_overall() %>%       # Add an Overall column
+  bold_labels()           # Make variable names bold
+
+
+#----------------------------------------------------------------------------------------------------------------------------Final Output
+table1_modified
+
+
+
+
+#---------------------------------------------------------------Preliminary Table 1
 table1 <- df_table1 %>%
   # Select variables to include in Table 1
   select(
@@ -99,18 +217,9 @@ table1 <- df_table1 %>%
   add_overall() %>%       # Add an Overall column
   bold_labels()           # Make variable names bold
 
-# 4. Display the table in the console
-table1
 
 
-# 5. Export options (Word / CSV)
-# Export as a Word document (.docx)
-# table1 %>%
-#   as_flex_table() %>%
-#   flextable::save_as_docx(path = "Table1_Baseline_Characteristics.docx")
-# 
-# # Export as a CSV file
-# table1 %>%
+
 #   as_tibble() %>%
 #   write.csv("Table1_Baseline_Characteristics.csv", row.names = FALSE)
 
