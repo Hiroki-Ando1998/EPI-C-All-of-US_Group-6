@@ -28,11 +28,11 @@ We collected the data for establishing the study cohort within the All of Us Res
 - Basic: Do you own or rent the place where you live?
 - Current age
 - Observation: Postal code and Tabacco smoking status
-- Personal And Family Health History: Including yourself, who in your family has had multiple sclerosis (MS)?
-- Personal And Family Health History: Including yourself, who in your family has had rheumatoid arthritis (RA)?
+- Personal And Family Health History: Including yourself, who in your family has had multiple sclerosis (MS)-Self?
+- Personal And Family Health History: Including yourself, who in your family has had rheumatoid arthritis (RA)-Self?
 
 After collecting the data, we established the study cohort using R propgramming
-[R-code_cohort](https://github.com/Hiroki-Ando1998/EPI-C-All-of-US_Group-6/blob/main/R/20261006_Table1_1_creating_DataFramework.R):
+[R-code_cohort](https://github.com/Hiroki-Ando1998/EPI-C-All-of-US_Group-6/blob/main/R/20261008_Creating_DataFramework.R):
 1. We included individuals in the study cohort who visited the EHS at least twice **and** answered the survey question before 2024: 'Think about the place you live. Do you have problems with any of the following?
 2. From this cohort, we included **only** individuals who answered all six basic questions and provided information on postal code and current age.
 3. **Exposed participants** were defined as individuals within the established cohort who reported "Mold" in response to the housing question ("Think about the place you live)
