@@ -117,9 +117,24 @@ df_cohort_modified <- df_table1 %>%
   ))
 
 
+# #------------------------Save the created datafrmaework in Bucket of the workbench
+# 
+# # 1. Specify the target bucket path
+# my_target_bucket <- "gs://inflammatory-disease-plus-mold-exposure-5-wb-meteoric-aubergine/"
+# 
+# # 2. Save the data frame as a local temporary CSV file
+# write.csv(df_cohort_modified, "20261009_df_cohort_modified.csv", row.names = FALSE)
+# 
+# # 3. Transfer (copy) the CSV file to the specified bucket
+# system(sprintf("gsutil cp 20261009_df_cohort_modified.csv %s", my_target_bucket))
+# 
+# # 4. Verify that the file was successfully uploaded to the bucket
+# system(sprintf("gsutil ls %s", my_target_bucket))
 
 
-#-----------------------------------------------------------------------Table 1
+
+
+#---------------------------------------------------------------------------------------------Table 1
 
 table1_modified <- df_cohort_modified %>%
   # Select variables to include in Table 1
