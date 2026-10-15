@@ -19,14 +19,31 @@ gcs_file_path <- "gs://inflammatory-disease-plus-mold-exposure-5-wb-meteoric-aub
 system(sprintf("gsutil cp %s .", gcs_file_path))
 df_cohort_modified <- read.csv("20261009_df_cohort_modified.csv")
 
+
+df_cohort_modified <- df_cohort_modified %>%
+  mutate(survey_datetime.y = as.POSIXct(survey_datetime.y,format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
+    condition_start_datetime_Rheumatoid_EHS = as.POSIXct(condition_start_datetime_Rheumatoid_EHS, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
+    condition_start_datetime_Sclerosis_EHS = as.POSIXct(condition_start_datetime_Sclerosis_EHS, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
+    condition_start_datetime_Psoriasis_EHS = as.POSIXct(condition_start_datetime_Psoriasis_EHS, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
+    Self_Report_date_rheumatoid_multiple_sclerosis = as.POSIXct(Self_Report_date_rheumatoid_multiple_sclerosis, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"),
+    Self_Report_date_rheumatoid = as.POSIXct(Self_Report_date_rheumatoid, format = "%Y-%m-%d %H:%M:%S", tz = "UTC"))
+
+
 #View(df_cohort)
 #View(df_cohort_modified)
 
 
-#--------------------------------------------------------
-df <- df_cohort_modified
+#------------------------------------------------------ Check the number who answered exposure question before identificaiton by EHS system
+df_RM_EHS <- df_cohort_modified %>%
+  filter(!is.na(survey_datetime.y), !is.na(condition_start_datetime_Rheumatoid_EHS), survey_datetime.y < condition_start_datetime_Rheumatoid_EHS) 
+nrow(df_RM_EHS)                          #269
+table(df_cohort_modified$Rheumatoid_EHS) #1989
 
-names(df)
+
+
+#------------------------------------------------------- Preliminary step for logistic analysis
+df <- df_cohort_modified
+#names(df)
 
 # Exposure: Yes = 1, None = 0
 df$exposure_group <- ifelse(df$exposure_group == "Exposed (Mold)", 1L, 0L)
@@ -37,6 +54,7 @@ df$multiple_sclerosis_self_Report <- ifelse(df$multiple_sclerosis_self_Report ==
 df$Rheumatoid_EHS <- ifelse(df$Rheumatoid_EHS == "Yes", 1L, 0L)
 df$rheumatoid_self_Report <- ifelse(df$rheumatoid_self_Report == "yes", 1L, 0L)
 df$Psoriasis <- ifelse(df$Psoriasis == "Yes", 1L, 0L)
+
 #--------------------------------------------------------------------------------------------------------------Logistic Regression (Outcome ~ Exposure (without covariates))
 
 #------------------------------------------------------------------------------(1-A) EHS: Multiple Sclerosis
