@@ -1,5 +1,5 @@
 
-install.packages(c("brms", "rstan"))
+install.packages("brms")
 
 library(bigrquery)
 library(dplyr)
@@ -7,7 +7,7 @@ library(tidyverse)
 library(readr)
 library(gtsummary)
 library(brms)
-library(rstan)
+#library(rstan)
 
 #-------------------------------------------------------------------------- Get path to the bucket in the workspace (i.e., Google Cloud)
 # 1. Specify the GCS file path and local file name
