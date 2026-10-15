@@ -148,6 +148,22 @@ plot(fit_PS_EHS) #Posterior distribution
 
 
 
+#--------------------------------------------------------------------------------------------Result
+
+
+
+summary(fit_MS_EHS)
+summary(fit_MS_Self)
+summary(fit_RM_EHS)
+summary(fit_RM_Self)
+summary(fit_PS_EHS)
+
+plot(fit_MS_EHS)
+plot(fit_MS_Self) #Posterior distribution
+plot(fit_RM_EHS) #Posterior distribution
+plot(fit_RM_Self) #Posterior distribution
+plot(fit_PS_EHS)
+
 
 
 
