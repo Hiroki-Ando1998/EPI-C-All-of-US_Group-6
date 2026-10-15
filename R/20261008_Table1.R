@@ -8,6 +8,7 @@ library(tidyverse)
 library(readr)
 library(gtsummary)
 
+
 #-------------------------------------------------------------------------- Get path to the bucket in the workspace (i.e., Google Cloud)
 # 1. Specify the GCS file path and local file name
 gcs_file_path <- "gs://inflammatory-disease-plus-mold-exposure-5-wb-meteoric-aubergine/20261008_df_cohort_finalized.csv"
@@ -104,15 +105,15 @@ df_cohort_modified <- df_table1 %>%
     TRUE ~ "unspecified"
   ))%>%
   mutate(Rheumatoid_EHS = case_when(
-    Rheumatoid_EHS %in% c("None") ~ "None",
+    Rheumatoid_EHS %in% c("none") ~ "None",
     TRUE ~ "Yes"
   ))%>%
   mutate(Multiple_Sclerosis_EHS = case_when(
-    Multiple_Sclerosis_EHS %in% c("None") ~ "None",
+    Multiple_Sclerosis_EHS %in% c("none") ~ "None",
     TRUE ~ "Yes"
   ))%>%
   mutate(Psoriasis_EHS = case_when(
-    Psoriasis_EHS %in% c("None") ~ "None",
+    Psoriasis_EHS %in% c("none") ~ "None",
     TRUE ~ "Yes"
   ))
 
@@ -237,4 +238,6 @@ table1 <- df_table1 %>%
 
 #   as_tibble() %>%
 #   write.csv("Table1_Baseline_Characteristics.csv", row.names = FALSE)
+
+
 
