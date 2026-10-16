@@ -1,13 +1,11 @@
 
-install.packages("rstan")
+
 
 library(bigrquery)
 library(dplyr)
 library(tidyverse)
 library(readr)
 library(gtsummary)
-library(brms)
-library(rstan)
 
 #-------------------------------------------------------------------------- Get path to the bucket in the workspace (i.e., Google Cloud)
 # 1. Specify the GCS file path and local file name
@@ -114,13 +112,14 @@ fit_glm_unajusted <- glm(
 )
 
 
-
 fit_glm_adjusted <- glm(
   Multiple_Sclerosis_EHS ~ exposure_group + sex_male + Health_insurance + 
     Age_group + Grade_school + Employment_status + Household_income + House_own_rent,
   data = df,
   family = binomial(link = "logit")
 )
+
+
 
 #----------------------------(1) Brief summary of Result
 summary(fit_glm_unajusted)
