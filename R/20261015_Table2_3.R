@@ -1,6 +1,7 @@
 # Removed un-specified sex and health insurance
 
 
+
 install.packages(c("brms", "rstan"))
 
 library(bigrquery)
@@ -42,12 +43,9 @@ nrow(df_RM_EHS)                          #269
 table(df_cohort_modified$Rheumatoid_EHS) #1989
 
 #-----------------------------------------------------
-df_cohort_1 <- df_cohort_modified %>% filter(Sex_at_birth == "male" | Sex_at_birth == "female") %>%
-  filter(Health_insurance == "Yes" | Health_insurance == "No")
-
 df_cohort_1 <- df_cohort_modified %>%
   filter(Sex_at_birth != "unspecified") %>%
-  filter(Health_insurance %in% c("Yes", "No"))
+  filter(Health_insurance != "Unspecified")
 
 df <- df_cohort_1
 
@@ -187,6 +185,10 @@ plot(fit_MS_EHS)
 plot(fit_MS_Self) #Posterior distribution
 plot(fit_RM_EHS) #Posterior distribution
 plot(fit_RM_Self) #Posterior distribution
+plot(fit_PS_EHS)
+
+
+
 plot(fit_PS_EHS)
 
 
