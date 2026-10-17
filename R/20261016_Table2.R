@@ -1,6 +1,9 @@
 
 
 
+
+
+
 library(bigrquery)
 library(dplyr)
 library(tidyverse)
@@ -42,7 +45,6 @@ table(df_cohort_modified$Rheumatoid_EHS) #1989
 df_cohort_1 <- df_cohort_modified %>%
   filter(Sex_at_birth != "unspecified") %>%
   filter(Grade_school != "unspecified") %>%
-  filter(Age_group_char != "unspecified") %>%
   filter(Health_insurance != "Unspecified")
 
 
@@ -97,14 +99,15 @@ df$House_own_rent <- factor(df$House_own_rent,
 
 
 # Outcome: Yes = 1, None = 0
-df$Multiple_Sclerosis_EHS <- ifelse(df$Multiple_Sclerosis_EHS == "Yes", 1, 0)
-df$multiple_sclerosis_self_Report <- ifelse(df$multiple_sclerosis_self_Report == "yes", 1, 0)
-df$Rheumatoid_EHS <- ifelse(df$Rheumatoid_EHS == "Yes", 1, 0)
-df$rheumatoid_self_Report <- ifelse(df$rheumatoid_self_Report == "yes", 1, 0)
-df$Psoriasis <- ifelse(df$Psoriasis == "Yes", 1, 0)
+df$Multiple_Sclerosis_EHS <- ifelse(df$Multiple_Sclerosis_EHS == "Yes", 1L, 0L)
+df$multiple_sclerosis_self_Report <- ifelse(df$multiple_sclerosis_self_Report == "yes", 1L, 0L)
+df$Rheumatoid_EHS <- ifelse(df$Rheumatoid_EHS == "Yes", 1L, 0L)
+df$rheumatoid_self_Report <- ifelse(df$rheumatoid_self_Report == "yes", 1L, 0L)
+df$Psoriasis <- ifelse(df$Psoriasis == "Yes", 1L, 0L)
 
 
 # -------------------------------------------------------------------------------------------Frequentist logistic regression model
+
 fit_glm_unajusted <- glm(
   Multiple_Sclerosis_EHS ~ exposure_group,
   data = df,
@@ -136,6 +139,9 @@ print(round(coef_adjusted, 3))
 
 ##----------------------------(3) Odds ratio & 95% CI
 adj_OR <- exp(cbind(OR = coef(fit_glm_adjusted), confint.default(fit_glm_adjusted)))
+print(round(adj_OR, 3))
+
+
 print(round(adj_OR, 3))
 
 
