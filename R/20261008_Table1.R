@@ -2,6 +2,7 @@
 install.packages(c("bigrquery", "tidyverse", "gtsummary"))
 
 
+
 library(bigrquery)
 library(dplyr)
 library(tidyverse)
@@ -31,7 +32,6 @@ df_table1 <- df_cohort %>%
   mutate(
     # Create age categories based on birth date
     Age_group_char = case_when(
-      Date_of_birth >= "2007-01-01" ~ "<26 years (Born 2007 or later)",
       Date_of_birth >= "2000-01-01" & Date_of_birth < "2007-01-01" ~ "18–25 years (Born 2000–2007)",     
       Date_of_birth >= "1985-01-01" & Date_of_birth < "2000-01-01" ~ "26–41 years (Born 1985–1999)",
       Date_of_birth >= "1965-01-01" & Date_of_birth < "1985-01-01" ~ "42–60 years (Born 1965–1984)",
@@ -42,8 +42,7 @@ df_table1 <- df_cohort %>%
     Age_group = factor(
       Age_group_char,
       levels = c(
-        "<18 years (Born 2007 or later)",
-        "<18-25 years (Born 2000-2007)",
+        "18-25 years (Born 2000-2007)",
         "26–41 years (Born 1985–1999)",
         "42–60 years (Born 1965–1984)",
         "≥61 years (Born before 1965)"
@@ -135,13 +134,13 @@ df_cohort_modified <- df_table1 %>%
 
 
 
-#---------------------------------------------------------------------------------------------Table 1
+#---------------------------------------------------------------------------------------------Preliminary Table 1
 
-table1_modified <- df_cohort_modified %>%
+table1_preliminary <- df_cohort_modified %>%
   # Select variables to include in Table 1
   select(
     exposure_group,       # Grouping variable (Exposed vs Unexposed)
-    Age_group,
+    Age_group_char,
     Race,
     Sex_at_birth,
     Postal_code_1st,
@@ -161,7 +160,7 @@ table1_modified <- df_cohort_modified %>%
     by = exposure_group, # Compare across exposure groups
     missing = "ifany",   # Display missing values (NA) only if present
     label = list(        # Define variable labels for display
-      Age_group ~ "Age group",
+      Age_group_char ~ "Age group",
       Race ~ "Race/Ethnicity",
       Sex_at_birth ~ "Sex at birth",
       Postal_code_1st ~ "Postal code (1st digit)",
@@ -183,12 +182,97 @@ table1_modified <- df_cohort_modified %>%
 
 
 #----------------------------------------------------------------------------------------------------------------------------Final Output
+
+df_cohort_1 <- df_cohort_modified %>%
+  filter(Sex_at_birth != "unspecified") %>%
+  filter(Grade_school != "unspecified") %>%
+  filter(Health_insurance != "Unspecified")
+
+
+
+
+
+table1_modified <- df_cohort_1 %>%
+  # Select variables to include in Table 1
+  select(
+    exposure_group,       # Grouping variable (Exposed vs Unexposed)
+    Age_group_char,
+    Race,
+    Sex_at_birth,
+    Postal_code_1st,
+    Health_insurance,
+    House_own_rent,
+    Grade_school,
+    Household_income,
+    Employment_status,
+    Rheumatoid_EHS,
+    rheumatoid_self_Report,
+    Multiple_Sclerosis_EHS,
+    multiple_sclerosis_self_Report,
+    Psoriasis_EHS,
+  ) %>%
+  # Generate summary table
+  tbl_summary(
+    by = exposure_group, # Compare across exposure groups
+    missing = "ifany",   # Display missing values (NA) only if present
+    
+    type = list(
+      Health_insurance ~ "categorical"
+    ),
+    
+    label = list(        # Define variable labels for display
+      Age_group_char ~ "Age group",
+      Race ~ "Race/Ethnicity",
+      Sex_at_birth ~ "Sex at birth",
+      Postal_code_1st ~ "Postal code (1st digit)",
+      Health_insurance ~ "Health insurance coverage", #"Are you covered by health insurance or some other kind of health care plan?"
+      House_own_rent ~ "Housing status (Own/Rent)",   # "Do you own or rent the place where you live?")
+      Grade_school ~ "Education level",               # "What is the highest grade or year of school you completed?")
+      Household_income ~ "Annual household income",   # "What is your annual household income from all sources?")
+      Employment_status ~ "Employment status",        # "What is your current employment status? Please select 1 or more of these categories.")
+      Psoriasis_EHS ~ "Psoriasis_EHS",
+      Rheumatoid_EHS ~ "Rheumatoid arthritis_EHS",
+      rheumatoid_self_Report ~ "Rheumatoid arthritis_Self_Report",        #"Including yourself, who in your family has had rheumatoid arthritis (RA)? self."
+      Multiple_Sclerosis_EHS ~ "Multiple sclerosis_EHS",
+      multiple_sclerosis_self_Report ~ "Multiple sclerosis_Self_Report"   #"Including yourself, who in your family has had multiple sclerosis (MS)? self."
+    )
+  ) %>%
+  #add_p() %>%             # Calculate p-values for group comparisons (Chi-square, Fisher's exact test, etc.)
+  add_overall() %>%       # Add an Overall column
+  bold_labels()           # Make variable names bold
+
+
+
+
+
+#------------------------------------------------------------------------------------Final output (table1_modified)
 table1_modified
+#table1_preliminary
 
 
 
 
-#---------------------------------------------------------------Preliminary Table 1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#----------------------------------------------------------------------------------Preliminary of Preliminary Table 1
 table1 <- df_table1 %>%
   # Select variables to include in Table 1
   select(
